@@ -6,6 +6,7 @@ import { SupabaseModule } from './supabase/supabase.module';
 import { ScraperModule } from './scraper/scraper.module';
 import { ProfileModule } from './profile/profile.module';
 import { MatchmakerModule } from './matchmaker/matchmaker.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { MatchmakerModule } from './matchmaker/matchmaker.module';
     SupabaseModule, 
     ScraperModule, 
     ProfileModule, 
-    MatchmakerModule
+    MatchmakerModule,
+    PrismaModule
   ],
   controllers: [AppController],
   providers: [AppService],
