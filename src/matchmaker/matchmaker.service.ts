@@ -13,7 +13,7 @@ type MatchedJob = {
 export class MatchmakerService {
   private readonly logger = new Logger(MatchmakerService.name);
 
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(private readonly supabaseService: SupabaseService) { }
 
   async getRecommendations(
     userId: string,
@@ -58,7 +58,7 @@ export class MatchmakerService {
     };
 
     return {
-      data: typedMatchedJobs.map((job) => ({
+      data: matchedJobs?.map((job: any) => ({
         jobId: job.id,
         title: job.title,
         company: job.company,

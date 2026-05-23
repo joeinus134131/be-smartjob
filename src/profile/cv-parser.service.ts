@@ -15,7 +15,7 @@ export class CvParserService {
 
   async parseCv(resumeText: string) {
     this.logger.log('Parsing CV with Nvidia NIM and Stepfun...');
-    
+
     const prompt = `
       Extract the following information from the provided resume text:
       1. A list of technical skills (return as JSON array of strings).
@@ -48,7 +48,7 @@ export class CvParserService {
 
       for await (const chunk of completion) {
         const delta = chunk.choices[0]?.delta;
-        
+
         const reasoning = (delta as any)?.reasoning_content;
         if (reasoning) {
           reasoningContent += reasoning;
@@ -76,7 +76,7 @@ export class CvParserService {
       cleanedContent = cleanedContent.trim();
 
       const parsedData = JSON.parse(cleanedContent || '{}');
-      
+
       // Generate embedding for the entire resume text using Nvidia embedding model
       this.logger.log('Generating embedding with Nvidia NIM Llama Nemotron...');
       const embeddingResponse = await this.openai.embeddings.create({

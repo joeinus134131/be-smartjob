@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import * as WebSocket from 'ws';
 
 @Injectable()
 export class SupabaseService {
@@ -15,7 +16,10 @@ export class SupabaseService {
       this.logger.warn('Supabase URL or Key is not defined in environment variables');
     } else {
       this.supabase = createClient(supabaseUrl, supabaseKey, {
-        auth: { persistSession: false }
+        auth: { persistSession: false },
+        realtime: {
+          transport: WebSocket as any
+        }
       });
       this.logger.log('Supabase client initialized');
     }
