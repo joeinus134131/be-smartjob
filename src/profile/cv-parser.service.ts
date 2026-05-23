@@ -8,12 +8,13 @@ export class CvParserService {
 
   constructor() {
     this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.NVIDIA_NIM_API_KEY,
+      baseURL: 'https://integrate.api.nvidia.com/v1',
     });
   }
 
   async parseCv(resumeText: string) {
-    this.logger.log('Parsing CV with OpenAI...');
+    this.logger.log('Parsing CV with Nvidia NIM and Stepfun...');
     
     const prompt = `
       Extract the following information from the provided resume text:
@@ -33,19 +34,57 @@ export class CvParserService {
     `;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+      const completion = await this.openai.chat.completions.create({
+        model: 'stepfun-ai/step-3.5-flash',
         messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' }
+        temperature: 1,
+        top_p: 0.9,
+        max_tokens: 16384,
+        stream: true
       });
 
-      const parsedData = JSON.parse(response.choices[0].message.content || '{}');
+      let content = '';
+      let reasoningContent = '';
+
+      for await (const chunk of completion) {
+        const delta = chunk.choices[0]?.delta;
+        
+        const reasoning = (delta as any)?.reasoning_content;
+        if (reasoning) {
+          reasoningContent += reasoning;
+        }
+
+        if (delta?.content) {
+          content += delta.content;
+        }
+      }
+
+      if (reasoningContent) {
+        this.logger.log(`Model Reasoning:\n${reasoningContent}`);
+      }
+
+      // Clean the content in case the model returns markdown code block formatting
+      let cleanedContent = content.trim();
+      if (cleanedContent.startsWith('```json')) {
+        cleanedContent = cleanedContent.substring(7);
+      } else if (cleanedContent.startsWith('```')) {
+        cleanedContent = cleanedContent.substring(3);
+      }
+      if (cleanedContent.endsWith('```')) {
+        cleanedContent = cleanedContent.substring(0, cleanedContent.length - 3);
+      }
+      cleanedContent = cleanedContent.trim();
+
+      const parsedData = JSON.parse(cleanedContent || '{}');
       
-      // Also generate embedding for the entire resume text
+      // Generate embedding for the entire resume text using Nvidia embedding model
+      this.logger.log('Generating embedding with Nvidia NIM Llama Nemotron...');
       const embeddingResponse = await this.openai.embeddings.create({
-        model: 'text-embedding-3-small',
+        model: 'nvidia/llama-nemotron-embed-1b-v2',
         input: resumeText,
-      });
+        input_type: 'passage',
+        dimensions: 1536
+      } as any);
 
       const embedding = embeddingResponse.data[0].embedding;
 
@@ -59,3 +98,4 @@ export class CvParserService {
     }
   }
 }
+
