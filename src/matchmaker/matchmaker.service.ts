@@ -1,11 +1,19 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 
+type MatchedJob = {
+  id: string;
+  title: string;
+  company: string;
+  url: string;
+  similarity: number;
+};
+
 @Injectable()
 export class MatchmakerService {
   private readonly logger = new Logger(MatchmakerService.name);
 
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(private readonly supabaseService: SupabaseService) { }
 
   async getRecommendations(
     userId: string,
@@ -35,6 +43,8 @@ export class MatchmakerService {
       match_count: limit,
     });
 
+    const typedMatchedJobs = (matchedJobs ?? []) as MatchedJob[];
+
     if (searchError) {
       this.logger.error('Error searching vector database:', searchError);
       throw new Error(`Vector search failed: ${searchError.message}`);
@@ -42,7 +52,7 @@ export class MatchmakerService {
 
     // Calculate mock pagination meta
     const meta = {
-      totalItems: matchedJobs ? matchedJobs.length : 0, // Mock total
+      totalItems: typedMatchedJobs.length, // Mock total
       totalPages: 1,
       currentPage: page,
     };
@@ -55,9 +65,8 @@ export class MatchmakerService {
         url: job.url,
         matchScore: job.similarity,
         missingSkills: [] // In a real scenario, compare profile.extracted_skills with job.required_skills
-      })) || [],
+      })),
       meta
     };
   }
 }
-

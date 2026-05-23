@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+model Profile {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String?   @map("user_id") @db.Uuid
+  name              String?
+  extractedSkills   String[]  @map("extracted_skills")
+  experienceLevel   String?   @map("experience_level")
+  yearsOfExperience Int?      @map("years_of_experience")
+  resumeText        String?   @map("resume_text")
+  embedding         Unsupported("vector(1536)")?
+  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime? @default(now()) @map("updated_at") @db.Timestamptz
+
+  @@map("profiles")
+}
+
+model Job {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title          String
+  company        String
+  location       String?
+  description    String?
+  url            String    @unique
+  platform       String
+  requiredSkills String[]  @map("required_skills")
+  embedding      Unsupported("vector(1536)")?
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("jobs")
+}
