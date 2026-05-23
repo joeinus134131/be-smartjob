@@ -48,7 +48,7 @@ export class MatchmakerService {
     };
 
     return {
-      data: matchedJobs?.map(job => ({
+      data: matchedJobs?.map((job: any) => ({
         jobId: job.id,
         title: job.title,
         company: job.company,
