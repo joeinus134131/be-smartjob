@@ -8,7 +8,7 @@ export class CvParserService {
 
   constructor() {
     this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENAI_API_KEY || 'dummy-key-to-prevent-crash-on-boot',
     });
   }
 
