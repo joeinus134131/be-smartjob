@@ -2,18 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export enum Platform {
-  LINKEDIN = 'linkedin',
-  INDEED = 'indeed',
-  GLASSDOOR = 'glassdoor',
-  JOBSTREET = 'jobstreet',
+  REMOTIVE = 'remotive',
+  ARBEITNOW = 'arbeitnow',
+  HIMALAYAS = 'himalayas',
 }
 
 export class CreateScrapingJobDto {
   @ApiProperty({
-    description: 'Platform yang ingin di-crawl',
+    description: 'Platform yang ingin ditarik (Free APIs)',
     enum: Platform,
     isArray: true,
-    example: ['linkedin', 'indeed'],
+    example: ['remotive', 'arbeitnow'],
   })
   @IsArray()
   @IsEnum(Platform, { each: true })

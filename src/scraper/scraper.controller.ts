@@ -1,5 +1,5 @@
-import { Controller, Post, Get, Body, Param, NotFoundException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { Controller, Post, Body } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ScraperService } from './scraper.service';
 import { CreateScrapingJobDto } from './dto/create-scraping-job.dto';
 
@@ -9,23 +9,11 @@ export class ScraperController {
   constructor(private readonly scraperService: ScraperService) {}
 
   @Post('jobs')
-  @ApiOperation({ summary: 'Trigger scraping job baru', description: 'Memulai proses crawling secara asinkron' })
-  @ApiResponse({ status: 202, description: 'Job scraping berhasil diterima dan masuk ke dalam antrean.' })
+  @ApiOperation({ summary: 'Tarik data pekerjaan (Sync)', description: 'Mengambil data dari free APIs secara langsung' })
+  @ApiResponse({ status: 200, description: 'Data berhasil diambil dari platform' })
   async createJob(@Body() createScrapingJobDto: CreateScrapingJobDto) {
-    return this.scraperService.queueScrapingJob(createScrapingJobDto);
-  }
-
-  @Get('jobs/:jobId')
-  @ApiOperation({ summary: 'Cek status scraping job' })
-  @ApiParam({ name: 'jobId', required: true })
-  @ApiResponse({ status: 200, description: 'Status terkini dari tugas crawling.' })
-  @ApiResponse({ status: 404, description: 'Job tidak ditemukan' })
-  async getJobStatus(@Param('jobId') jobId: string) {
-    const status = await this.scraperService.getJobStatus(jobId);
-    if (!status) {
-      throw new NotFoundException(`Job with ID ${jobId} not found`);
-    }
-    return status;
+    return this.scraperService.runScrapingJob(createScrapingJobDto);
   }
 }
+
 
